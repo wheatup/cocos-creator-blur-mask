@@ -1,0 +1,11 @@
+{
+  "ver": "1.0.14",
+  "uuid": "27d0a05c-2fd6-4700-9c43-5452b4660bc7",
+  "compiledShaders": [
+    {
+      "vert": "\n#define _IS_VERT_SHADER 1\n\n\tprecision highp float;\n\n\tuniform mat4 cc_matViewProj;\n\n\t#if _USE_MODEL\n\t\tuniform mat4 cc_matWorld;\n\t#endif\n\n\tattribute vec3 a_position;\n\tattribute lowp vec4 a_color;\n\n\t#if USE_TEXTURE\n\t\tattribute mediump vec2 a_uv0;\n\t\tvarying mediump vec2 v_uv0;\n\t#endif\n\n\tvarying lowp vec4 v_color;\n\n\tvoid main () {\n\t\tmat4 mvp;\n\t\t\n\t\t#if _USE_MODEL\n\t\t\tmvp = cc_matViewProj * cc_matWorld;\n\t\t#else\n\t\t\tmvp = cc_matViewProj;\n\t\t#endif\n\n\t\t#if USE_TEXTURE\n\t\t\tv_uv0 = a_uv0;\n\t\t#endif\n\n\t\tv_color = a_color;\n\n\t\tgl_Position = mvp * vec4(a_position, 1);\n\t}\n\n\n",
+      "frag": "\n#define _IS_FRAG_SHADER 1\n\n\tprecision highp float;\n\n\tuniform float time;\n\t#if USE_TEXTURE\n\t\tuniform sampler2D texture;\n\t\tvarying mediump vec2 v_uv0;\n\t#endif\n\n\t\n\n#if USE_ALPHA_TEST\n  uniform float alphaThreshold;\n#endif\n\nvoid ALPHA_TEST (in vec4 color) {\n  #if USE_ALPHA_TEST\n      if (color.a < alphaThreshold) discard;\n  #endif\n}\n\nvoid ALPHA_TEST (in float alpha) {\n  #if USE_ALPHA_TEST\n      if (alpha < alphaThreshold) discard;\n  #endif\n}\n\n\tvarying lowp vec4 v_color;\n\n\tvoid main () {\n\t\tvec4 color = v_color;\n\n\t\t#if USE_TEXTURE\n\t\t\tvec2 uv = v_uv0;\n\t\t\tuv -= 0.1;\n\t\t\tuv *= 1.25;\n\t\t\tuv.y += sin(uv.x * 16.0 + time * 2.0) * 0.05;\n\t\t\tcolor *= texture2D(texture, uv);\n\n\t\t\tif (uv.x < 0.0 || uv.x > 1.0) {\n\t\t\t\tcolor.a = 0.0;\n\t\t\t} else if (uv.y < 0.01) {\n\t\t\t\tcolor.a = smoothstep(0.01, 0.0, abs(0.01 - uv.y));\n\t\t\t} else if (uv.y > 0.99) {\n\t\t\t\tcolor.a = smoothstep(0.01, 0.0, abs(0.01 + uv.y - 1.0));\n\t\t\t}\n\t\t\t\n\t\t\t#if _USE_ETC1_TEXTURE\n\t\t\t\tcolor.a *= texture2D(texture, v_uv0 + vec2(0, 0.5)).r;\n\t\t\t#endif\n\t\t#endif\n\n\t\tALPHA_TEST(color);\n\n\t\tgl_FragColor = color;\n\t}\n\n\n"
+    }
+  ],
+  "subMetas": {}
+}

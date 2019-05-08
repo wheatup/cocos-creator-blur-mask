@@ -1,0 +1,86 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+
+%{
+  techniques: [
+    {
+      passes: [
+        {
+          vert: vs
+          frag: fs
+          cullMode: none
+          blend: true
+        }
+      ]
+      layer: 0
+    }
+  ]
+  properties: {
+    texture: {
+      type: sampler2D
+      value: null
+    }
+  }
+%}
+
+%% vs {
+
+precision highp float;
+
+uniform mat4 cc_matViewProj;
+attribute vec3 a_position;
+attribute mediump vec2 a_uv0;
+varying mediump vec2 v_uv0;
+
+void main () {
+  gl_Position = cc_matViewProj * vec4(a_position, 1);
+  v_uv0 = a_uv0;
+}
+
+}
+
+%% fs {
+	precision highp float;
+
+	uniform sampler2D texture;
+    varying mediump vec2 v_uv0;
+
+    vec4 draw(vec2 uv) {
+        return texture2D(texture, uv).rgba; 
+    }
+
+    float grid(float var, float size) {
+        return floor(var*size)/size;
+    }
+
+    float rand(vec2 co){
+        return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+    }
+
+	vec4 dim(vec4 col, float factor){
+		return vec4(col.r * factor, col.g * factor, col.b * factor, col.a);
+	}
+
+    void mainImage( out vec4 fragColor, in vec2 uv0 )
+    {
+        vec2 uv = uv0.xy;
+		float bluramount = 0.04;
+        vec4 blurred_image = vec4(0.);
+        #define repeats 30.
+        for (float i = 0.; i < repeats; i++) { 
+            vec2 q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) * (rand(vec2(i,uv.x+uv.y))+bluramount); 
+            vec2 uv2 = uv+(q*bluramount);
+            blurred_image += draw(uv2)/2.;
+            q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) * (rand(vec2(i+2.,uv.x+uv.y+24.))+bluramount); 
+            uv2 = uv+(q*bluramount);
+            blurred_image += draw(uv2)/2.;
+        }
+        blurred_image /= repeats;
+		blurred_image = dim(blurred_image, 0.5);
+        fragColor = vec4(blurred_image);
+    }
+
+    void main()
+    {
+        mainImage(gl_FragColor, v_uv0.xy);
+    }
+}
