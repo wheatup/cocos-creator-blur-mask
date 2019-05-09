@@ -37,10 +37,15 @@ export default class BlurMask extends cc.Component {
 
 	// 截图并模糊
 	snapshot() {
+		let active = this.node.active;
+		// 截图前隐藏当前层
+		this.node.active = false;
 		// 手动渲染摄影机，保存截图
 		this.camera.render(cc.Canvas.instance.node);
 		// 应用刚刚截图的贴图到sprite身上进行渲染
 		this.spriteFrame.setTexture(this.texture);
+		// 还原当前层显示
+		this.node.active = active;
 	}
 
 	update(dt) {

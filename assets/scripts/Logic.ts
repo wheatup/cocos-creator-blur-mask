@@ -33,7 +33,7 @@ export default class Logic extends cc.Component {
 		this.mask.active = false;
 		this.mask.opacity = 0;
 
-		this.tapReceiver.on('mousedown', () => this.showing ? this.hide() : this.show(), this);
+		// this.tapReceiver.on('mousedown', () => this.showing ? this.hide() : this.show(), this);
 		this.tapReceiver.on('touchstart', () => this.showing ? this.hide() : this.show(), this);
 	}
 
