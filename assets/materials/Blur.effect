@@ -65,7 +65,7 @@ void main () {
         vec2 uv = uv0.xy;
 		float bluramount = 0.04;
         vec4 blurred_image = vec4(0.);
-        #define repeats 30.
+        #define repeats 16.
         for (float i = 0.; i < repeats; i++) { 
             vec2 q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) * (rand(vec2(i,uv.x+uv.y))+bluramount); 
             vec2 uv2 = uv+(q*bluramount);
