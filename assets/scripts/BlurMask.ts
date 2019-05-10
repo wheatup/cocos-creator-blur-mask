@@ -8,6 +8,8 @@ export default class BlurMask extends cc.Component {
 	spriteFrame: cc.SpriteFrame = null;
 	sprite: cc.Sprite = null;
 
+	_lastSize = new cc.Size(0, 0);
+
 	// 用于模糊的材质
 	// @ts-ignore
 	@property(cc.Material) material: cc.Material = null;
@@ -21,7 +23,7 @@ export default class BlurMask extends cc.Component {
 
 		// 创建渲染贴图对象
 		this.texture = new cc.RenderTexture();
-		this.texture.initWithSize(cc.Canvas.instance.node.width, cc.Canvas.instance.node.height);
+		this.texture.initWithSize(this.node.width, this.node.height);
 
 		// 在node上创建摄影机
 		this.camera = this.node.addComponent(cc.Camera);
@@ -44,10 +46,21 @@ export default class BlurMask extends cc.Component {
 
 	// 截图并模糊
 	snapshot() {
+		let size = this.node.getContentSize();
+
+		if(size.width !== this._lastSize.width || size.height !== this._lastSize.height){
+			// 大小发生改变，重新设置texture大小
+			this.texture.initWithSize(this.node.width, this.node.height);
+			this.camera.targetTexture = this.texture;
+		}
+
+		this._lastSize.width = size.width;
+		this._lastSize.height = size.height;
+
 		// 手动渲染摄影机，保存截图
 		this.camera.render(cc.Canvas.instance.node);
 		// 应用刚刚截图的贴图到sprite身上进行渲染
-		this.spriteFrame.setTexture(this.texture, this.node.getBoundingBoxToWorld());
+		this.spriteFrame.setTexture(this.texture, this.node.getBoundingBoxToWorld(), false, cc.Vec2.ZERO, this.node.getContentSize());
 	}
 
 	update(dt) {
