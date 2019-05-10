@@ -1190,6 +1190,8 @@
         "__id__": 31
       }
     ],
+    "bightness": 0.5,
+    "blurAmount": 0.5,
     "_id": "0bLkZNPgtDvKtOTiS9IXdU"
   },
   {

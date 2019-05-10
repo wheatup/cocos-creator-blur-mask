@@ -10,12 +10,38 @@ export default class BlurMask extends cc.Component {
 
 	_lastSize = new cc.Size(0, 0);
 
-	// 用于模糊的材质
-	// @ts-ignore
-	@property(cc.Material) material: cc.Material = null;
+	@property({
+		// @ts-ignore
+		type: cc.Material,
+		displayName: '模糊材质',
+		tooltip: '用于应用模糊所用的材质，如无特殊需求请保持默认'
+	})
+	material = null;
 
-	@property([cc.Node])
+	@property({
+		type: [cc.Node],
+		displayName: '忽略节点列表',
+		tooltip: '在此列表内的节点将不会被模糊遮罩渲染'
+	})
 	ignoredNodes = [];
+
+	@property({
+		type: Number,
+		displayName: '亮度',
+		tooltip: '降低背景的亮度',
+		min: 0,
+		max: 1
+	})
+	bightness: number = 0.5;
+
+	@property({
+		type: Number,
+		displayName: '模糊度',
+		tooltip: '背景的模糊程度',
+		min: 0,
+		max: 1
+	})
+	blurAmount: number = 0.5;
 
 	start() {
 		// 截图图像是翻转的，所以y轴镜像
@@ -41,7 +67,10 @@ export default class BlurMask extends cc.Component {
 		this.spriteFrame = new cc.SpriteFrame();
 		this.sprite = this.node.addComponent(cc.Sprite);
 		this.sprite.spriteFrame = this.spriteFrame;
+		this.material['_props']['bightness'] = this.bightness;
+		this.material['_props']['blurAmount'] = this.blurAmount;
 		this.sprite['_materials'][0] = this.material;
+		console.log(this.material);
 	}
 
 	// 截图并模糊

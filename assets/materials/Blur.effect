@@ -42,6 +42,8 @@ void main () {
 	precision highp float;
 
 	uniform sampler2D texture;
+	uniform float bightness;
+	uniform float blurAmount;
     varying mediump vec2 v_uv0;
 
     vec4 draw(vec2 uv) {
@@ -62,10 +64,10 @@ void main () {
 
     void mainImage( out vec4 fragColor, in vec2 uv0 )
     {
+		#define repeats 16.
         vec2 uv = uv0.xy;
-		float bluramount = 0.04;
+		float bluramount = 0.08 * blurAmount;
         vec4 blurred_image = vec4(0.);
-        #define repeats 16.
         for (float i = 0.; i < repeats; i++) { 
             vec2 q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) * (rand(vec2(i,uv.x+uv.y))+bluramount); 
             vec2 uv2 = uv+(q*bluramount);
@@ -75,7 +77,7 @@ void main () {
             blurred_image += draw(uv2)/2.;
         }
         blurred_image /= repeats;
-		blurred_image = dim(blurred_image, 0.5);
+		blurred_image = dim(blurred_image, bightness);
         fragColor = vec4(blurred_image);
     }
 

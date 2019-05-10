@@ -7,5 +7,8 @@
     "__uuid__": "3eaafe6d-187a-4175-9669-7b03d92d4d6d"
   },
   "_defines": {},
-  "_props": {}
+  "_props": {
+	"bightness": 0.5,
+	"blurAmount": 1.0
+  }
 }
