@@ -2,7 +2,6 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class BlurMask extends cc.Component {
-
 	camera: cc.Camera = null;
 	texture: cc.RenderTexture = null;
 	spriteFrame: cc.SpriteFrame = null;
@@ -13,22 +12,22 @@ export default class BlurMask extends cc.Component {
 	@property({
 		// @ts-ignore
 		type: cc.Material,
-		displayName: '模糊材质',
-		tooltip: '用于应用模糊所用的材质，如无特殊需求请保持默认'
+		displayName: "模糊材质",
+		tooltip: "用于应用模糊所用的材质，如无特殊需求请保持默认"
 	})
 	material = null;
 
 	@property({
 		type: [cc.Node],
-		displayName: '忽略节点列表',
-		tooltip: '在此列表内的节点将不会被模糊遮罩渲染'
+		displayName: "忽略节点列表",
+		tooltip: "在此列表内的节点将不会被模糊遮罩渲染"
 	})
 	ignoredNodes = [];
 
 	@property({
 		type: Number,
-		displayName: '亮度',
-		tooltip: '降低背景的亮度',
+		displayName: "亮度",
+		tooltip: "降低背景的亮度",
 		min: 0,
 		max: 1
 	})
@@ -36,8 +35,8 @@ export default class BlurMask extends cc.Component {
 
 	@property({
 		type: Number,
-		displayName: '模糊度',
-		tooltip: '背景的模糊程度',
+		displayName: "模糊度",
+		tooltip: "背景的模糊程度",
 		min: 0,
 		max: 1
 	})
@@ -60,16 +59,16 @@ export default class BlurMask extends cc.Component {
 		this.camera.enabled = false;
 
 		// 将自身与忽略对象排除渲染
-		this.node['_cullingMask'] = 0x10000000;
-		this.ignoredNodes.map(node => node['_cullingMask'] = 0x10000000);
+		this.node["_cullingMask"] = 0x10000000;
+		this.ignoredNodes.map(node => (node["_cullingMask"] = 0x10000000));
 
 		// 创建一个sprite组件，由其进行渲染
 		this.spriteFrame = new cc.SpriteFrame();
 		this.sprite = this.node.addComponent(cc.Sprite);
 		this.sprite.spriteFrame = this.spriteFrame;
-		this.material['_props']['bightness'] = this.bightness;
-		this.material['_props']['blurAmount'] = this.blurAmount;
-		this.sprite['_materials'][0] = this.material;
+		this.material["_props"]["bightness"] = this.bightness;
+		this.material["_props"]["blurAmount"] = this.blurAmount;
+		this.sprite["_materials"][0] = this.material;
 		console.log(this.material);
 	}
 
@@ -77,7 +76,7 @@ export default class BlurMask extends cc.Component {
 	snapshot() {
 		let size = this.node.getContentSize();
 
-		if(size.width !== this._lastSize.width || size.height !== this._lastSize.height){
+		if (size.width !== this._lastSize.width || size.height !== this._lastSize.height) {
 			// 大小发生改变，重新设置texture大小
 			this.texture.initWithSize(this.node.width, this.node.height);
 			this.camera.targetTexture = this.texture;
