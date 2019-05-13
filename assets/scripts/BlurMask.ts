@@ -69,7 +69,6 @@ export default class BlurMask extends cc.Component {
 		this.material["_props"]["bightness"] = this.bightness;
 		this.material["_props"]["blurAmount"] = this.blurAmount;
 		this.sprite["_materials"][0] = this.material;
-		console.log(this.material);
 	}
 
 	// 截图并模糊
@@ -88,7 +87,7 @@ export default class BlurMask extends cc.Component {
 		// 手动渲染摄影机，保存截图
 		this.camera.render(cc.Canvas.instance.node);
 		// 应用刚刚截图的贴图到sprite身上进行渲染
-		this.spriteFrame.setTexture(this.texture, this.node.getBoundingBoxToWorld(), false, cc.Vec2.ZERO, this.node.getContentSize());
+		this.spriteFrame.setTexture(this.texture, this.node.getBoundingBoxToWorld(), false, new cc.Vec2(-(cc.Canvas.instance.designResolution.width - cc.Canvas.instance.node.width) * 0.5, -(cc.Canvas.instance.designResolution.height - cc.Canvas.instance.node.height) * 0.5), this.node.getContentSize());
 	}
 
 	update(dt) {
