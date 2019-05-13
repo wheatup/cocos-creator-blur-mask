@@ -84,10 +84,12 @@ export default class BlurMask extends cc.Component {
 		this._lastSize.width = size.width;
 		this._lastSize.height = size.height;
 
+		// console.log(this.node, this.node.getBoundingBoxToWorld(), this.node.getContentSize(), this.camera, cc.Canvas.instance);
+
 		// 手动渲染摄影机，保存截图
 		this.camera.render(cc.Canvas.instance.node);
 		// 应用刚刚截图的贴图到sprite身上进行渲染
-		this.spriteFrame.setTexture(this.texture, this.node.getBoundingBoxToWorld(), false, cc.Vec2.ZERO, this.node.getContentSize());
+		this.spriteFrame.setTexture(this.texture);
 	}
 
 	update(dt) {
