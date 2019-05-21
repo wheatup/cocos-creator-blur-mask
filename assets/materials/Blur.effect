@@ -1,88 +1,111 @@
-// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+/**
+ * 模糊shader
+ * @author wheatup
+ * @reference https://github.com/ShawnZhang2015/ShaderHelper/blob/master/assets/shader/GaussBlurs.js
+ * @version 1.0
+ */
 
 %{
-  techniques: [
-    {
-      passes: [
-        {
-          vert: vs
-          frag: fs
-          cullMode: none
-          blend: true
-        }
-      ]
-      layer: 0
-    }
-  ]
-  properties: {
-    texture: {
-      type: sampler2D
-      value: null
-    }
-  }
+	techniques : [
+		{
+			passes : [
+				{
+					vert : vs
+					frag : fs
+					cullMode : none
+					blend : true
+				}
+			]
+			layer : 0
+		}
+	]
+	properties : {
+		texture : {
+			type : sampler2D
+			value : null
+		}
+	}
 %}
 
 %% vs {
-
-precision highp float;
-
-uniform mat4 cc_matViewProj;
-attribute vec3 a_position;
-attribute mediump vec2 a_uv0;
-varying mediump vec2 v_uv0;
-
-void main () {
-  gl_Position = cc_matViewProj * vec4(a_position, 1);
-  v_uv0 = a_uv0;
-}
-
+	precision highp float;
+	
+	uniform mat4 cc_matViewProj;
+	attribute vec3 a_position;
+	attribute mediump vec2 a_uv0;
+	varying mediump vec2 v_uv0;
+	
+	void main() {
+		gl_Position = cc_matViewProj * vec4(a_position, 1);
+		v_uv0 = a_uv0;
+	}
 }
 
 %% fs {
-	precision highp float;
-
+	// float低精度(反正都模糊了，精度无所谓)
+	precision lowp float;
+	// 贴图采样器，来自于v2f管线
 	uniform sampler2D texture;
+	// 亮度，外界属性
 	uniform float bightness;
+	// 模糊度，外界属性
 	uniform float blurAmount;
-    varying mediump vec2 v_uv0;
-
-    vec4 draw(vec2 uv) {
-        return texture2D(texture, uv).rgba; 
-    }
-
-    float grid(float var, float size) {
-        return floor(var*size)/size;
-    }
-
-    float rand(vec2 co){
-        return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-    }
-
-	vec4 dim(vec4 col, float factor){
+	// 当前点uv
+	varying lowp vec2 v_uv0;
+	
+	// 应用贴图UV
+	vec4 draw(vec2 uv) {
+		return texture2D(texture, uv).rgba;
+	}
+	
+	// 随机值
+	float rand(vec2 co) {
+		return fract(sin(dot(co.xy , vec2(12.9898, 78.233))) * 43758.5453);
+	}
+	
+	// 降低亮度
+	vec4 dim(vec4 col, float factor) {
 		return vec4(col.r * factor, col.g * factor, col.b * factor, col.a);
 	}
+	
+	// 主方法
+	void mainImage(out vec4 fragColor, in vec2 uv0) {
+		// 重复次数，值越大模糊质量越高，但性能越低
+		#define repeats 16.0
 
-    void mainImage( out vec4 fragColor, in vec2 uv0 )
-    {
-		#define repeats 16.
-        vec2 uv = uv0.xy;
+		// 贴图UV值
+		vec2 uv = uv0.xy;
+
+		// 模糊值
 		float bluramount = 0.08 * blurAmount;
-        vec4 blurred_image = vec4(0.);
-        for (float i = 0.; i < repeats; i++) { 
-            vec2 q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) * (rand(vec2(i,uv.x+uv.y))+bluramount); 
-            vec2 uv2 = uv+(q*bluramount);
-            blurred_image += draw(uv2)/2.;
-            q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) * (rand(vec2(i+2.,uv.x+uv.y+24.))+bluramount); 
-            uv2 = uv+(q*bluramount);
-            blurred_image += draw(uv2)/2.;
-        }
-        blurred_image /= repeats;
-		blurred_image = dim(blurred_image, bightness);
-        fragColor = vec4(blurred_image);
-    }
+		
+		// 模糊贴图
+		vec4 blurred_image = vec4(0.0);
+		
+		// 重复采样
+		for(float i = 0.0; i < repeats; i ++ ) {
+			// 第一采样点
+			vec2 q = vec2(cos(degrees((i / repeats) * 360.0)), sin(degrees((i / repeats) * 360.0))) * (rand(vec2(i, uv.x + uv.y)) + bluramount);
+			vec2 uv2 = uv + (q * bluramount);
+			blurred_image += draw(uv2) / 2.0;
+			
+			// 第二采样点
+			q = vec2(cos(degrees((i / repeats) * 360.0)), sin(degrees((i / repeats) * 360.0))) * (rand(vec2(i + 2.0, uv.x + uv.y + 24.0)) + bluramount);
+			uv2 = uv + (q * bluramount);
+			blurred_image += draw(uv2) / 2.0;
+		}
 
-    void main()
-    {
-        mainImage(gl_FragColor, v_uv0.xy);
-    }
+		// 中和
+		blurred_image /= repeats;
+
+		// 降低亮度
+		blurred_image = dim(blurred_image, bightness);
+
+		// 导出颜色
+		fragColor = vec4(blurred_image);
+	}
+	
+	void main() {
+		mainImage(gl_FragColor, v_uv0.xy);
+	}
 }

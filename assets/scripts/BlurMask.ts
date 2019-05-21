@@ -1,3 +1,9 @@
+/**
+ * 模糊节点控制器
+ * @author wheatup
+ * @version 1.0
+ */
+
 const { ccclass, property } = cc._decorator;
 
 @ccclass
@@ -8,6 +14,7 @@ export default class BlurMask extends cc.Component {
 	sprite: cc.Sprite = null;
 
 	_lastSize = new cc.Size(0, 0);
+	_cullingMask = 0x10000000;
 
 	@property({
 		// @ts-ignore
@@ -25,7 +32,7 @@ export default class BlurMask extends cc.Component {
 	ignoredNodes = [];
 
 	@property({
-		type: Number,
+		type: cc.Float,
 		displayName: "亮度",
 		tooltip: "降低背景的亮度",
 		min: 0,
@@ -34,7 +41,7 @@ export default class BlurMask extends cc.Component {
 	bightness: number = 0.5;
 
 	@property({
-		type: Number,
+		type: cc.Float,
 		displayName: "模糊度",
 		tooltip: "背景的模糊程度",
 		min: 0,
@@ -52,15 +59,15 @@ export default class BlurMask extends cc.Component {
 
 		// 在node上创建摄影机
 		this.camera = this.node.addComponent(cc.Camera);
-		// 不渲染0x10的cullingMask对象
-		this.camera.cullingMask = 0xffffffff ^ 0x10000000;
+		// 不渲染0x10000000的cullingMask对象
+		this.camera.cullingMask = 0xffffffff ^ this._cullingMask;
 		this.camera.targetTexture = this.texture;
 		// 关闭摄影机，否则每一帧它会自动进行渲染
 		this.camera.enabled = false;
 
 		// 将自身与忽略对象排除渲染
-		this.node["_cullingMask"] = 0x10000000;
-		this.ignoredNodes.map(node => (node["_cullingMask"] = 0x10000000));
+		this.node["_cullingMask"] = this._cullingMask;
+		this.ignoredNodes.map(node => (node["_cullingMask"] = this._cullingMask));
 
 		// 创建一个sprite组件，由其进行渲染
 		this.spriteFrame = new cc.SpriteFrame();
@@ -74,20 +81,17 @@ export default class BlurMask extends cc.Component {
 	// 截图并模糊
 	snapshot() {
 		let size = this.node.getContentSize();
-
 		if (size.width !== this._lastSize.width || size.height !== this._lastSize.height) {
 			// 大小发生改变，重新设置texture大小
 			this.texture.initWithSize(this.node.width, this.node.height);
 			this.camera.targetTexture = this.texture;
 		}
-
 		this._lastSize.width = size.width;
 		this._lastSize.height = size.height;
 
-		// console.log(this.node, this.node.getBoundingBoxToWorld(), this.node.getContentSize(), this.camera, cc.Canvas.instance);
-
 		// 手动渲染摄影机，保存截图
 		this.camera.render(cc.Canvas.instance.node);
+
 		// 应用刚刚截图的贴图到sprite身上进行渲染
 		this.spriteFrame.setTexture(this.texture);
 	}

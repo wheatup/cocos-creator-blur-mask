@@ -1,3 +1,9 @@
+/**
+ * 背景doge
+ * @author wheatup
+ * @version 1.0
+ */
+
 const { ccclass, property } = cc._decorator;
 
 @ccclass

@@ -1,12 +1,8 @@
-// Learn TypeScript:
-//  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/typescript.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/typescript.html
-// Learn Attribute:
-//  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/reference/attributes.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/reference/attributes.html
-// Learn life-cycle callbacks:
-//  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
+/**
+ * 点击面板弹出提示框行为
+ * @author wheatup
+ * @version 1.0
+ */
 
 const { ccclass, property } = cc._decorator;
 
@@ -33,7 +29,6 @@ export default class Logic extends cc.Component {
 		this.mask.active = false;
 		this.mask.opacity = 0;
 
-		// this.tapReceiver.on('mousedown', () => this.showing ? this.hide() : this.show(), this);
 		this.tapReceiver.on('touchstart', () => this.showing ? this.hide() : this.show(), this);
 	}
 
@@ -41,10 +36,13 @@ export default class Logic extends cc.Component {
 		this.showing = true;
 		this.mask.active = true;
 		this.panel.active = true;
+
+		Wheen.stop(this.mask);
 		new Wheen(this.mask)
 			.to({ opacity: 255 }, 500, Wheen.Easing.Cubic.easeOut)
 			.start();
 
+		Wheen.stop(this.panel);
 		new Wheen(this.panel)
 			.to({ opacity: 255, scale: 1 }, 500, Wheen.Easing.Back.easeOut)
 			.start();
@@ -53,14 +51,17 @@ export default class Logic extends cc.Component {
 	hide() {
 		this.showing = false;
 		this.panel.active = true;
+
+		Wheen.stop(this.mask);
 		new Wheen(this.mask)
 			.to({ opacity: 0 }, 500, Wheen.Easing.Cubic.easeOut)
-			.on('finish', () => this.mask.active = false)
+			.callFunc(() => this.panel.active = false)
 			.start();
 
+		Wheen.stop(this.panel);
 		new Wheen(this.panel)
 			.to({ opacity: 0, scale: 0 }, 500, Wheen.Easing.Back.easeIn)
-			.on('finish', () => this.panel.active = false)
+			.callFunc(() => this.panel.active = false)
 			.start();
 	}
 }
