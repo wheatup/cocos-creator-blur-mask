@@ -67,7 +67,6 @@ export default class BlurMask extends cc.Component {
 
 		// 将自身与忽略对象排除渲染
 		this.cull(this.node);
-		this.node["_cullingMask"] = this._cullingMask;
 		this.ignoredNodes.map(node => this.cull(node));
 
 		// 创建一个sprite组件，由其进行渲染
@@ -77,15 +76,6 @@ export default class BlurMask extends cc.Component {
 		this.material["_props"]["bightness"] = this.bightness;
 		this.material["_props"]["blurAmount"] = this.blurAmount;
 		this.sprite["_materials"][0] = this.material;
-	}
-
-	private cull(node: cc.Node) {
-		if (node) {
-			node["_cullingMask"] = this._cullingMask;
-			if (node.childrenCount > 0) {
-				node.children.map(child => this.cull(child));
-			}
-		}
 	}
 
 	// 截图并模糊
@@ -109,5 +99,15 @@ export default class BlurMask extends cc.Component {
 	update(dt) {
 		// 每一帧都进行截图处理，可以换成需要的时候再调用，比较省资源
 		this.snapshot();
+	}
+
+	// 排除忽略渲染对象及其子对象
+	private cull(node: cc.Node) {
+		if (node) {
+			node["_cullingMask"] = this._cullingMask;
+			if (node.childrenCount > 0) {
+				node.children.map(child => this.cull(child));
+			}
+		}
 	}
 }

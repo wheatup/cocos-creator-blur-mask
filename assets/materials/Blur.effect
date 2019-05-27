@@ -105,6 +105,7 @@
 		fragColor = vec4(blurred_image);
 	}
 	
+	// 入口函数
 	void main() {
 		mainImage(gl_FragColor, v_uv0.xy);
 	}
