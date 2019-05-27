@@ -66,8 +66,9 @@ export default class BlurMask extends cc.Component {
 		this.camera.enabled = false;
 
 		// 将自身与忽略对象排除渲染
+		this.cull(this.node);
 		this.node["_cullingMask"] = this._cullingMask;
-		this.ignoredNodes.map(node => (node["_cullingMask"] = this._cullingMask));
+		this.ignoredNodes.map(node => this.cull(node));
 
 		// 创建一个sprite组件，由其进行渲染
 		this.spriteFrame = new cc.SpriteFrame();
@@ -76,6 +77,15 @@ export default class BlurMask extends cc.Component {
 		this.material["_props"]["bightness"] = this.bightness;
 		this.material["_props"]["blurAmount"] = this.blurAmount;
 		this.sprite["_materials"][0] = this.material;
+	}
+
+	private cull(node: cc.Node) {
+		if (node) {
+			node["_cullingMask"] = this._cullingMask;
+			if (node.childrenCount > 0) {
+				node.children.map(child => this.cull(child));
+			}
+		}
 	}
 
 	// 截图并模糊
