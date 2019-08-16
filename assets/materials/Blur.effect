@@ -60,7 +60,7 @@
 	
 	// 随机值
 	float rand(vec2 co) {
-		return fract(sin(dot(co.xy , vec2(12.9898, 78.233))) * 43758.5453);
+		return sin(dot(co.xy , vec2(16.336, 78.233)) * 43758.5453) * 0.5 + 0.5;
 	}
 	
 	// 降低亮度
@@ -77,7 +77,7 @@
 		vec2 uv = uv0.xy;
 
 		// 模糊值
-		float bluramount = 0.08 * blurAmount;
+		float bluramount = 0.06 * blurAmount;
 		
 		// 模糊贴图
 		vec4 blurred_image = vec4(0.0);

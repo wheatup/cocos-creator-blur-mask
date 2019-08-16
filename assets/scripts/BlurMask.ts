@@ -55,7 +55,7 @@ export default class BlurMask extends cc.Component {
 
 		// 创建渲染贴图对象
 		this.texture = new cc.RenderTexture();
-		this.texture.initWithSize(this.node.width, this.node.height);
+		this.texture.initWithSize(this.node.width, this.node.height, cc.game['_renderContext']['STENCIL_INDEX8']);
 
 		// 在node上创建摄影机
 		this.camera = this.node.addComponent(cc.Camera);
