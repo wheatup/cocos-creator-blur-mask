@@ -53,14 +53,37 @@
 	// 当前点uv
 	varying lowp vec2 v_uv0;
 	
-	// 应用贴图UV
-	vec4 draw(vec2 uv) {
-		return texture2D(texture, uv).rgba;
+	vec4 blur(vec2 uv){
+		// 重复次数，值越大模糊质量越高，但性能越低
+		#define repeats 16.0
+
+		// 模糊值
+		float _blurAmount = 0.08 * blurAmount;
+
+		vec4 blurred = vec4(0.0);
+
+		// 重复采样
+		for(float i = 0.0; i < repeats; i ++ ) {
+			// 第一采样点
+			vec2 q = vec2(cos(degrees((i / repeats) * 360.0)), sin(degrees((i / repeats) * 360.0))) * (rand(vec2(i, uv.x + uv.y)) + _blurAmount);
+			vec2 uv2 = uv + (q * _blurAmount);
+			blurred += texture2D(texture, uv).rgba / 2.0;
+			
+			// 第二采样点
+			q = vec2(cos(degrees((i / repeats) * 360.0)), sin(degrees((i / repeats) * 360.0))) * (rand(vec2(i + 2.0, uv.x + uv.y + 24.0)) + _blurAmount);
+			uv2 = uv + (q * _blurAmount);
+			blurred += texture2D(texture, uv).rgba / 2.0;
+		}
+
+		// 中和
+		blurred /= repeats;
+
+		return blurred;
 	}
 	
 	// 随机值
 	float rand(vec2 co) {
-		return sin(dot(co.xy , vec2(16.336, 78.233)) * 43758.5453) * 0.5 + 0.5;
+		return fract(sin(dot(co.xy , vec2(12.9898, 78.233))) * 43758.5453);
 	}
 	
 	// 降低亮度
@@ -68,45 +91,8 @@
 		return vec4(col.r * factor, col.g * factor, col.b * factor, col.a);
 	}
 	
-	// 主方法
-	void mainImage(out vec4 fragColor, in vec2 uv0) {
-		// 重复次数，值越大模糊质量越高，但性能越低
-		#define repeats 16.0
-
-		// 贴图UV值
-		vec2 uv = uv0.xy;
-
-		// 模糊值
-		float bluramount = 0.06 * blurAmount;
-		
-		// 模糊贴图
-		vec4 blurred_image = vec4(0.0);
-		
-		// 重复采样
-		for(float i = 0.0; i < repeats; i ++ ) {
-			// 第一采样点
-			vec2 q = vec2(cos(degrees((i / repeats) * 360.0)), sin(degrees((i / repeats) * 360.0))) * (rand(vec2(i, uv.x + uv.y)) + bluramount);
-			vec2 uv2 = uv + (q * bluramount);
-			blurred_image += draw(uv2) / 2.0;
-			
-			// 第二采样点
-			q = vec2(cos(degrees((i / repeats) * 360.0)), sin(degrees((i / repeats) * 360.0))) * (rand(vec2(i + 2.0, uv.x + uv.y + 24.0)) + bluramount);
-			uv2 = uv + (q * bluramount);
-			blurred_image += draw(uv2) / 2.0;
-		}
-
-		// 中和
-		blurred_image /= repeats;
-
-		// 降低亮度
-		blurred_image = dim(blurred_image, bightness);
-
-		// 导出颜色
-		fragColor = vec4(blurred_image);
-	}
-	
 	// 入口函数
 	void main() {
-		mainImage(gl_FragColor, v_uv0.xy);
+		gl_FragColor = vec4(dim(blur(v_uv0), bightness));
 	}
 }

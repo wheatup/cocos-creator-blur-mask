@@ -83,7 +83,7 @@ export default class BlurMask extends cc.Component {
 		let size = this.node.getContentSize();
 		if (size.width !== this._lastSize.width || size.height !== this._lastSize.height) {
 			// 大小发生改变，重新设置texture大小
-			this.texture.initWithSize(this.node.width, this.node.height);
+			this.texture.initWithSize(this.node.width, this.node.height, cc.game['_renderContext']['STENCIL_INDEX8']);
 			this.camera.targetTexture = this.texture;
 		}
 		this._lastSize.width = size.width;
