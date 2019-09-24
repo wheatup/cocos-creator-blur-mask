@@ -52,6 +52,16 @@
 	uniform float blurAmount;
 	// 当前点uv
 	varying lowp vec2 v_uv0;
+
+	// 随机值
+	float rand(vec2 co) {
+		return fract(sin(dot(co.xy , vec2(12.9898, 78.233))) * 43758.5453);
+	}
+
+	// 降低亮度
+	vec4 dim(vec4 col, float factor) {
+		return vec4(col.r * factor, col.g * factor, col.b * factor, col.a);
+	}
 	
 	vec4 blur(vec2 uv){
 		// 重复次数，值越大模糊质量越高，但性能越低
@@ -72,23 +82,13 @@
 			// 第二采样点
 			q = vec2(cos(degrees((i / repeats) * 360.0)), sin(degrees((i / repeats) * 360.0))) * (rand(vec2(i + 2.0, uv.x + uv.y + 24.0)) + _blurAmount);
 			uv2 = uv + (q * _blurAmount);
-			blurred += texture2D(texture, uv).rgba / 2.0;
+			blurred += texture2D(texture, uv2).rgba / 2.0;
 		}
 
 		// 中和
 		blurred /= repeats;
 
 		return blurred;
-	}
-	
-	// 随机值
-	float rand(vec2 co) {
-		return fract(sin(dot(co.xy , vec2(12.9898, 78.233))) * 43758.5453);
-	}
-	
-	// 降低亮度
-	vec4 dim(vec4 col, float factor) {
-		return vec4(col.r * factor, col.g * factor, col.b * factor, col.a);
 	}
 	
 	// 入口函数
